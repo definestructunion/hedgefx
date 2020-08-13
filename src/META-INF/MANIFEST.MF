@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Main-Class: Main
+Class-Path: lwjgl.jar lwjgl-bgfx.jar lwjgl-bgfx-natives-linux.jar lwjgl-
+ bgfx-natives-macos.jar lwjgl-bgfx-natives-windows.jar lwjgl-glfw.jar lw
+ jgl-glfw-natives-linux.jar lwjgl-glfw-natives-macos.jar lwjgl-glfw-nati
+ ves-windows.jar lwjgl-natives-linux.jar lwjgl-natives-macos.jar lwjgl-n
+ atives-windows.jar lwjgl-openal.jar lwjgl-openal-natives-linux.jar lwjg
+ l-openal-natives-macos.jar lwjgl-openal-natives-windows.jar lwjgl-stb.j
+ ar lwjgl-stb-natives-linux.jar lwjgl-stb-natives-macos.jar lwjgl-stb-na
+ tives-windows.jar jackson-annotations-2.9.8.jar jackson-core-2.9.8.jar 
+ jackson-databind-2.9.8.jar
+

@@ -1,0 +1,7 @@
+{
+	"display": "Windowed",
+	"backBufferWidth": 960,
+	"backBufferHeight": 540,
+	"vSyncEnabled": true,
+	"preferredBackend": "OpenGL"
+}
