@@ -14,9 +14,14 @@ public class VertexLayout implements BGFXResource {
 	private BGFXVertexLayout internal;
 	public BGFXVertexLayout internal() { return internal; }
 	
+	private VertexAttributes attributes;
+	public VertexAttributes getAttributes() { return attributes; }
+	
 	private GraphicsDevice graphicsDevice;
 	
 	public VertexLayout(VertexAttributes attributes, GraphicsDevice graphicsDevice) {
+		
+		this.attributes = attributes;
 		
 		internal = BGFXVertexLayout.calloc();
 		bgfx_vertex_layout_begin(internal, graphicsDevice.getApi().value);

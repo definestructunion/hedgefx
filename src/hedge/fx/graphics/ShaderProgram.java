@@ -30,6 +30,7 @@ public class ShaderProgram implements BGFXResource {
 	
 	@Override
 	public void dispose() {
+		System.out.println("Disposing");
 		bgfx_destroy_program(handle);
 	}
 }

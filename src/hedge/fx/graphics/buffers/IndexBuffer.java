@@ -24,7 +24,6 @@ public class IndexBuffer implements BGFXResource {
 	public IndexBuffer(ByteBuffer data, GraphicsDevice graphicsDevice) {
 		this.graphicsDevice = graphicsDevice;
 		BGFXMemory buffer = bgfx_make_ref(data); // make_ref might cause issues
-		//BGFXMemory buffer = bgfx_copy(data);
 		handle = bgfx_create_dynamic_index_buffer_mem(buffer, BGFX_BUFFER_NONE);
 		bgfx_set_dynamic_index_buffer((short)0, 0, 0);
 	}

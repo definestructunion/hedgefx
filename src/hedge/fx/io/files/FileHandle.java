@@ -234,20 +234,9 @@ public class FileHandle {
 	/** Reads the entire file into a byte array.
 	 * @throws RuntimeException if the file handle represents a directory, doesn't exist, or could not be read. */
 	public byte[] readBytes () {
-		/*InputStream input = read();
-		try {
-			return Files.readAllBytes(file.toPath());
-			//return StreamUtils.copyStreamToByteArray(input, estimateLength());
-		} catch (IOException ex) {
-			throw new RuntimeException("Error reading file: " + this, ex);
-		} finally {
-			IOUtils.closeQuietly(input);
-		}*/
-		
 		InputStream input = read();
 		try {
 			return input.readAllBytes();
-			//return StreamUtils.copyStreamToByteArray(input, estimateLength());
 		} catch (IOException ex) {
 			throw new RuntimeException("Error reading file: " + this, ex);
 		} finally {

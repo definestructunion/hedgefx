@@ -26,6 +26,12 @@ public class VertexBuffer implements BGFXResource {
 		handle = bgfx_create_dynamic_vertex_buffer(0, layout.internal(), layout.getHandle());
 	}*/
 	
+	public VertexBuffer(int size, VertexLayout layout, GraphicsDevice graphicsDevice) {
+		this.graphicsDevice = graphicsDevice;
+		handle = bgfx_create_dynamic_vertex_buffer(size, layout.internal(), layout.getHandle());
+		bgfx_set_dynamic_vertex_buffer(0, (short)0, 0, 0);
+	}
+	
 	public VertexBuffer(float[] data, VertexLayout layout, GraphicsDevice graphicsDevice) {
 		this(BufferUtils.toByteBuffer(data), layout, graphicsDevice);
 	}
@@ -33,10 +39,9 @@ public class VertexBuffer implements BGFXResource {
 	public VertexBuffer(ByteBuffer data, VertexLayout layout, GraphicsDevice graphicsDevice) {
 		this.graphicsDevice = graphicsDevice;
 		BGFXMemory buffer = bgfx_make_ref(data); // make_ref might cause issues
-		//BGFXMemory buffer = bgfx_copy(data);
 		handle = bgfx_create_dynamic_vertex_buffer_mem(buffer, layout.internal(), layout.getHandle());
-		bgfx_set_dynamic_vertex_buffer(0, (short)0, 0, 0);
 		vertices = data;
+		bgfx_set_dynamic_vertex_buffer(0, (short)0, 0, 0);
 	}
 	
 	public void setVertices(float[] data) {

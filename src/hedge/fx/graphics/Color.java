@@ -53,6 +53,14 @@ public class Color implements ICopy<Color> {
 		a = ((rgbaHex & 0x000000ff)) / 255f;
 	}
 	
+	/*public Color(int r, int g, int b, int a) {
+		this.r = r;
+		this.g = g;
+		this.b = b;
+		this.a = a;
+		hex = Float.intBitsToFloat((a << 24) | (b << 16) | (g << 8) | (r));
+	}*/
+	
 	public Color(float r, float g, float b, float a) {
 		r = clamp(r);
 		g = clamp(g);

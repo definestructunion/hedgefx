@@ -143,6 +143,8 @@ public class GraphicsDevice implements NativeResource {
 		initData.platformData(platformData);
 		initData.resolution(resolutionData);
 		//initData.limits(initLimitsData);
+		initData.limits().transientVbSize(0xFFFFFF);
+		initData.limits().transientIbSize(0xFFFFFF);
 		initData.limits().maxEncoders((short)1);
 		initData.type(initializer.getConfig().getPreferredBackend().value);
 		initData.vendorId(BGFX_PCI_ID_NONE);
@@ -158,11 +160,15 @@ public class GraphicsDevice implements NativeResource {
 		long supported = caps.supported();
 		System.out.println(supported);
 		
-		System.out.println("Texture 2D Arrays: " + (supported & BGFX_CAPS_TEXTURE_2D_ARRAY));
+		System.out.println("Texture 2D Arrays: " + (getBit((int)supported, (int)BGFX_CAPS_TEXTURE_2D_ARRAY)));
 		
 		stack.close();
 		
 		applyChanges();
+	}
+	
+	int getBit(int n, int k) {
+		return (n >> k) & 1;
 	}
 	
 	private long encoder;
