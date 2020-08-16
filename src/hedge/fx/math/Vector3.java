@@ -1,8 +1,8 @@
 package hedge.fx.math;
 
-import hedge.fx.util.copying.ICopy;
+import hedge.fx.util.copying.Copy;
 
-public class Vector3 implements ICopy<Vector3>
+public class Vector3 implements Copy<Vector3>
 {
 	public final float x;
 	public final float y;

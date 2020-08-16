@@ -3,11 +3,11 @@ package hedge.fx.graphics;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import hedge.fx.util.copying.ICopy;
+import hedge.fx.util.copying.Copy;
 
 import java.text.DecimalFormat;
 
-public class Color implements ICopy<Color> {
+public class Color implements Copy<Color> {
 	
 	public static Color red() { return new Color(0.902f, 0.098f, 0.294f, 1.0f); }
 	public static Color green() { return new Color(0.23529412f, 0.7058824f, 0.29411766f, 1.0f); }

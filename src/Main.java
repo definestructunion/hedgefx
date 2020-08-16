@@ -1,9 +1,6 @@
 import hedge.fx.app.GameConfiguration;
 import hedge.fx.app.GameInitializer;
-import hedge.fx.graphics.Color;
-import hedge.fx.graphics.GraphicsDevice;
-import hedge.fx.graphics.ShaderProgram;
-import hedge.fx.graphics.SpriteBatch;
+import hedge.fx.graphics.*;
 import hedge.fx.graphics.buffers.*;
 import hedge.fx.io.files.FileHandle;
 import hedge.fx.io.files.FileType;
@@ -17,7 +14,6 @@ import org.lwjgl.bgfx.BGFXVertexLayout;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Library;
 
-import java.awt.*;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -67,7 +63,7 @@ public class Main {
     
     Color cornflowerBlue = new Color(0x6495EDFF);
     
-    Color clearColor = Color.lavender();
+    Color clearColor = new Color(0x6495EDFF);//Color.lavender();
     
     Color col1 = new Color(1, 0, 0, 1);
     Color col2 = new Color(0, 0, 1, 1);
@@ -87,11 +83,17 @@ public class Main {
     Matrix4 proj;
     Matrix4 view;
     
-    short texture;
-    short texture2;
+    Texture texture;
+    Texture texture2;
+    
+    Texture texture3;
     
     private void loadTexture() {
-        int[] width = new int[1];
+        texture3 = new Texture(new FileHandle("bunny.jpg", FileType.Local));
+        texture = new Texture(new FileHandle("smile.png", FileType.Local));
+        texture2 = new Texture(new FileHandle("heart.png", FileType.Local));
+        
+        /*int[] width = new int[1];
         int[] height = new int[1];
         int[] bitsPerPixel = new int[1];
     
@@ -99,23 +101,23 @@ public class Main {
         int[] height2 = new int[1];
         int[] bitsPerPixel2 = new int[1];
         
-        ByteBuffer textureBuffer = stbi_load_from_memory(new FileHandle("116.jpg", FileType.Local).readByteBuffer(), width, height, bitsPerPixel, 4);
-        ByteBuffer textureBuffer2 = stbi_load_from_memory(new FileHandle("bunny.jpg", FileType.Local).readByteBuffer(), width2, height2, bitsPerPixel2, 4);
+        ByteBuffer textureBuffer = stbi_load_from_memory(new FileHandle("smile.png", FileType.Local).readByteBuffer(), width, height, bitsPerPixel, 4);
+        ByteBuffer textureBuffer2 = stbi_load_from_memory(new FileHandle("heart.png", FileType.Local).readByteBuffer(), width2, height2, bitsPerPixel2, 4);
         //ByteBuffer textureBuffer = stbi_load("116.jpg", width, height, bitsPerPixel, 4);
         
         BGFXMemory texMem = bgfx_copy(textureBuffer);
         BGFXMemory tex2Mem = bgfx_copy(textureBuffer2);
         
         texture = bgfx_create_texture_2d(width[0], height[0], false, 1, BGFX_TEXTURE_FORMAT_RGBA8,
-                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP, texMem);
+                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT, texMem);
     
         // 2d texture arrays are supported, but im not sure how to implement them
         
         texture2 = bgfx_create_texture_2d(width2[0], height2[0], false, 1, BGFX_TEXTURE_FORMAT_RGBA8,
-                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP, tex2Mem);
+                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT, tex2Mem);
         
         stbi_image_free(textureBuffer);
-        stbi_image_free(textureBuffer2);
+        stbi_image_free(textureBuffer2);*/
     }
     
     ShaderProgram program;
@@ -134,7 +136,27 @@ public class Main {
     
     SpriteBatch spriteBatch;
     
+    Font font;
+    
     private void init() {
+    
+        //FileHandle ttf = new FileHandle("Seagram tfb.ttf", FileType.Local);
+        FileHandle ttf = new FileHandle("PIXELADE.TTF", FileType.Local);
+        double start = 0, end = 0;
+        start = glfwGetTime();
+        try {
+            font = new Font(ttf.read(), 24, false);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        end = glfwGetTime();
+        
+        System.out.println("Time taken: " + (end - start) + " MS");
+        
+        /*String katakana = "アイウエオ";
+        for(int i = 0; i < katakana.length(); ++i) {
+            System.out.println((int)katakana.charAt(i));
+        }*/
         
         System.out.println("Renderer: " + GraphicsAPI.values()[bgfx_get_renderer_type()]);
         
@@ -175,15 +197,6 @@ public class Main {
         
         proj = Matrix4.ortho(0, graphicsDevice.getBackBufferWidth(), 0, graphicsDevice.getBackBufferHeight(), -1.0f, 1.0f);
         view = Matrix4.identity();
-    
-        try {
-            //BufferedImage.TYPE_INT_ARGB
-            Graphics2D graphics2D = null;
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new FileHandle("PIXELADE.TTF", FileType.Local).read());
-            System.out.println(font.getNumGlyphs());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         //loadTexture();
         
         spriteBatch = new SpriteBatch(graphicsDevice, vertexLayout, program);
@@ -204,9 +217,9 @@ public class Main {
         bgfx_set_view_transform(0, view.getBuffer(), proj.getBuffer());
         bgfx_set_view_rect(0, 0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight());
         bgfx_set_view_scissor(0, 0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight());
-        bgfx_set_view_clear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, cornflowerBlue.hexInt(), 1.0f, 0);
+        bgfx_set_view_clear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, clearColor.hexInt(), 1.0f, 0);
         bgfx_reset(graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight(), config.useVSync() ? BGFX_RESET_VSYNC : BGFX_RESET_NONE, BGFX_TEXTURE_FORMAT_RGBA8);
-    
+        
         graphicsDevice.show();
         
         double start = 0, end = 0;
@@ -218,30 +231,29 @@ public class Main {
             
             start = glfwGetTime();
             
-            /*bgfx_encoder_set_state(encoder, BGFX_STATE_WRITE_RGB
-													| BGFX_STATE_WRITE_A
-													| BGFX_STATE_WRITE_Z
-													| BGFX_STATE_DEPTH_TEST_LESS
-													| BGFX_STATE_MSAA, 0);*/
-            
             spriteBatch.begin();
             
-            int width = 12, height = 12;
-            int ps = 12;
-            int s = 12;
+            int width = 15, height = 15;
+            int ps = 32;
+            int s = 32;
+            int sw = font.getTexture().getWidth();
+            int sh = font.getTexture().getHeight();
             int subtractAmount = (height % 2 == 0) ? 1 : 1;
             for(int x = 0; x < width; ++x) {
                 for(int y = 0; y < height; ++y) {
-                    //if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture2, x * ps, y * ps, s, s, col2.hex);
-                    //else spriteBatch.draw(texture, x * ps, y * ps, s, s, col4.hex);
                     if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture2, x * ps, y * ps, s, s, color(prng));
                     else spriteBatch.draw(texture, x * ps, y * ps, s, s, color(prng));
                 }
             }
             
+            //spriteBatch.draw((short)0, 0, 0, 0, 0, 0x00000000);
+            
+           spriteBatch.draw(font.getTexture(), 25, 500, sw, sh, col1.hex);
+            
             spriteBatch.end();
+            //spriteBatch.flush();
             graphicsDevice.frame();
-    
+            
             sync.sync(60);
             
             end = glfwGetTime();
@@ -264,6 +276,6 @@ public class Main {
     }
     
     private static float color(Random prng) {
-        return Float.floatToIntBits(prng.nextInt(2147483647));
+        return Float.floatToIntBits(prng.nextInt(2147483647) | (255) << 24);
     }
 }

@@ -63,34 +63,52 @@ public class SpriteBatch implements Disposable {
 		drawCalls = 0;
 		//vbo.data().flip();
 		if(frames++ % 120 == 0) hasToldRecently = false;
+		//bgfx_set_state(BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_ALPHA, 0x00000000);
+	}
+	
+	private void flush() {
+		vbo.data().flip();
+		long encoder = graphicsDevice.getEncoder();
+		
+		long stateTransparent = BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA;
+		bgfx_encoder_set_state(graphicsDevice.getEncoder(), stateTransparent, 0x00000000);
+		
+		if(texture != null)
+			bgfx_encoder_set_texture(encoder,0, textureUniform, texture.getHandle(), 0xFFFFFFFF);
+		else
+			bgfx_encoder_set_texture(encoder,0, textureUniform, BGFX_INVALID_HANDLE, 0xFFFFFFFF);
+		bgfx_encoder_set_transient_vertex_buffer(encoder,0, vbo, 0, index, vertexLayout.getHandle());
+		bgfx_encoder_set_dynamic_index_buffer(encoder,ibo.getHandle(), 0, buffersSize);
+		
+		bgfx_submit(0, program.getHandle(), 1, false);
+		
+		index = 0;
+		graphicsDevice.endEncoder();
 	}
 	
 	public void end() {
-		long encoder = graphicsDevice.getEncoder();
-		
-		bgfx_encoder_set_texture(encoder,0, textureUniform, texture, 0xFFFFFFFF);
-		bgfx_encoder_set_transient_vertex_buffer(encoder,0, vbo, 0, index, vertexLayout.getHandle());
-		bgfx_encoder_set_dynamic_index_buffer(encoder,ibo.getHandle(), 0, Short.MAX_VALUE - 1024);
-		
-		bgfx_submit(0, program.getHandle(), 0, false);
-		
-		graphicsDevice.endEncoder();
-		index = 0;
+		flush();
+		this.texture = null;
 	}
 	
-	private short texture;
+	private Texture texture;
 	
-	public void draw(short texture, float x, float y, float width, float height, float color) {
+	public void draw(Texture texture, float x, float y, float width, float height, float color) {
 		if(!allowDrawing()) return;
 		
-		if((index >= buffersSize - (24 / 4) || (this.texture != texture))) {
-			end();
+		if((!texture.equals(this.texture)) && (this.texture != null)) {
+			flush();
+			begin();
+		}
+		
+		if((index >= buffersSize - (vertexLayout.getAttributes().getStride() / 4))) {
+			flush();
 			begin();
 		}
 		
 		this.texture = texture;
 		var buffer = vbo.data();
-		buffer.position(index * vertexLayout.getAttributes().getStride());
+		buffer.position(index * 24);
 		
 		buffer.putFloat(x).putFloat(y).putFloat(0);
 		buffer.putFloat(0.0f).putFloat(0.0f);
