@@ -1,35 +1,31 @@
-import hedge.fx.app.GameConfiguration;
-import hedge.fx.app.GameInitializer;
-import hedge.fx.graphics.*;
-import hedge.fx.graphics.buffers.*;
-import hedge.fx.io.files.FileHandle;
-import hedge.fx.io.files.FileType;
-import hedge.fx.math.Matrix4;
-import hedge.fx.platform.GraphicsAPI;
-import hedge.fx.util.Sync;
-import hedge.fx.util.logging.GameAppLogger;
-import hedge.fx.util.logging.ILogger;
-import org.lwjgl.bgfx.BGFXMemory;
-import org.lwjgl.bgfx.BGFXVertexLayout;
+import com.hgm.fx.app.GameConfiguration;
+import com.hgm.fx.app.GameInitializer;
+import com.hgm.fx.graphics.*;
+import com.hgm.fx.graphics.renderers.SpriteBatch;
+import com.hgm.fx.io.files.FileHandle;
+import com.hgm.fx.io.files.FileType;
+import com.hgm.fx.math.Matrix4;
+import com.hgm.fx.platform.GraphicsAPI;
+import com.hgm.fx.util.Sync;
+import com.hgm.fx.util.logging.GameAppLogger;
+import com.hgm.fx.util.logging.ILogger;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Library;
 
 import java.io.File;
-import java.nio.ByteBuffer;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Random;
 
 import static org.lwjgl.bgfx.BGFX.*;
-import static org.lwjgl.bgfx.BGFX.BGFX_ATTRIB_TYPE_UINT8;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-
-import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 
 public class Main {
 
     public static void main(String[] args) {
-        
         //Configuration.LIBRARY_PATH.set(new File("runtime/hedgefx").getAbsolutePath());
         Configuration.SHARED_LIBRARY_EXTRACT_DIRECTORY.set(new File("runtime/hedgefx").getAbsolutePath());
         Configuration.SHARED_LIBRARY_EXTRACT_PATH.set(new File("runtime/hedgefx").getAbsolutePath());
@@ -39,8 +35,8 @@ public class Main {
         config.setBackBufferWidth(1280);
         config.setBackBufferHeight(720);
         config.setTitle("");
-        config.setPreferredBackend(GraphicsAPI.DirectX11);
         config.setUseVSync(false);
+        config.setPreferredBackend(GraphicsAPI.OpenGL);
         
         ILogger logger = new GameAppLogger();
         GameInitializer initializer = new GameInitializer(config, logger);
@@ -85,63 +81,29 @@ public class Main {
     
     Texture texture;
     Texture texture2;
-    
+    Texture durga;
     Texture texture3;
+    Texture texture4;
     
     private void loadTexture() {
         texture3 = new Texture(new FileHandle("bunny.jpg", FileType.Local));
         texture = new Texture(new FileHandle("smile.png", FileType.Local));
         texture2 = new Texture(new FileHandle("heart.png", FileType.Local));
-        
-        /*int[] width = new int[1];
-        int[] height = new int[1];
-        int[] bitsPerPixel = new int[1];
-    
-        int[] width2 = new int[1];
-        int[] height2 = new int[1];
-        int[] bitsPerPixel2 = new int[1];
-        
-        ByteBuffer textureBuffer = stbi_load_from_memory(new FileHandle("smile.png", FileType.Local).readByteBuffer(), width, height, bitsPerPixel, 4);
-        ByteBuffer textureBuffer2 = stbi_load_from_memory(new FileHandle("heart.png", FileType.Local).readByteBuffer(), width2, height2, bitsPerPixel2, 4);
-        //ByteBuffer textureBuffer = stbi_load("116.jpg", width, height, bitsPerPixel, 4);
-        
-        BGFXMemory texMem = bgfx_copy(textureBuffer);
-        BGFXMemory tex2Mem = bgfx_copy(textureBuffer2);
-        
-        texture = bgfx_create_texture_2d(width[0], height[0], false, 1, BGFX_TEXTURE_FORMAT_RGBA8,
-                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT, texMem);
-    
-        // 2d texture arrays are supported, but im not sure how to implement them
-        
-        texture2 = bgfx_create_texture_2d(width2[0], height2[0], false, 1, BGFX_TEXTURE_FORMAT_RGBA8,
-                BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT, tex2Mem);
-        
-        stbi_image_free(textureBuffer);
-        stbi_image_free(textureBuffer2);*/
+        durga = new Texture(new FileHandle("durga.png", FileType.Local));
+        texture4 = new Texture(new FileHandle("116.jpg", FileType.Local));
     }
     
     ShaderProgram program;
     
     short textureUniform;
     
-    BGFXMemory vboMem;
-    
-    VertexAttributes vertexAttributes;
-    VertexLayout vertexLayout;
-    VertexBuffer vertexBuffer;
-    IndexBuffer indexBuffer;
-    
-    VertexBuffer vertexBuffer2;
-    IndexBuffer indexBuffer2;
-    
     SpriteBatch spriteBatch;
     
     Font font;
     
     private void init() {
-    
-        //FileHandle ttf = new FileHandle("Seagram tfb.ttf", FileType.Local);
-        FileHandle ttf = new FileHandle("PIXELADE.TTF", FileType.Local);
+        FileHandle ttf = new FileHandle("Seagram tfb.ttf", FileType.Local);
+        //FileHandle ttf = new FileHandle("PIXELADE.TTF", FileType.Local);
         double start = 0, end = 0;
         start = glfwGetTime();
         try {
@@ -181,17 +143,7 @@ public class Main {
             );
         }
         
-        //System.out.println(program.getHandle());
-        
         textureUniform = bgfx_create_uniform("texture", BGFX_UNIFORM_TYPE_VEC4, 1);
-        
-        vertexAttributes = new VertexAttributes(
-                new VertexAttribute(BGFX_ATTRIB_POSITION, 3, BGFX_ATTRIB_TYPE_FLOAT, false, false),
-                new VertexAttribute(BGFX_ATTRIB_TEXCOORD0, 2, BGFX_ATTRIB_TYPE_FLOAT, true, false),
-                new VertexAttribute(BGFX_ATTRIB_COLOR0, 4, BGFX_ATTRIB_TYPE_UINT8, true, false)
-        );
-        
-        vertexLayout = new VertexLayout(vertexAttributes, graphicsDevice);
         
         loadTexture();
         
@@ -199,7 +151,7 @@ public class Main {
         view = Matrix4.identity();
         //loadTexture();
         
-        spriteBatch = new SpriteBatch(graphicsDevice, vertexLayout, program);
+        spriteBatch = new SpriteBatch(graphicsDevice, program);
     }
     
     short frameBuffer;
@@ -225,6 +177,21 @@ public class Main {
         double start = 0, end = 0;
         double elapsed = 0;
         
+        int offset = 0;
+    
+        System.out.println(ClassLoader.getSystemClassLoader());
+    
+        URL url = null;
+        try {
+            url = new File("Test.jar").toURI().toURL();
+            var testClass = Class.forName("Test", true, new URLClassLoader(new URL[] { url }));
+            Object obj = testClass.getDeclaredConstructor().newInstance();
+            Method method = testClass.getMethod("test");
+            method.invoke(obj);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
         while(graphicsDevice.isRunning()) {
             x += 1.0f;
             glfwPollEvents();
@@ -232,29 +199,36 @@ public class Main {
             start = glfwGetTime();
             
             spriteBatch.begin();
-            
-            int width = 15, height = 15;
-            int ps = 32;
-            int s = 32;
+    
+            int width = 512, height = 512;
+            int ps = 2;
+            int s = 2;
             int sw = font.getTexture().getWidth();
             int sh = font.getTexture().getHeight();
             int subtractAmount = (height % 2 == 0) ? 1 : 1;
             for(int x = 0; x < width; ++x) {
                 for(int y = 0; y < height; ++y) {
-                    if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture2, x * ps, y * ps, s, s, color(prng));
-                    else spriteBatch.draw(texture, x * ps, y * ps, s, s, color(prng));
+                    if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture3, x * ps + offset, y * ps + offset, s, s, color(prng));
+                    else
+                        spriteBatch.draw(texture4, x * ps + offset, y * ps + offset, s, s, color(prng));
                 }
             }
             
-            //spriteBatch.draw((short)0, 0, 0, 0, 0, 0x00000000);
+            //++offset;
             
-           spriteBatch.draw(font.getTexture(), 25, 500, sw, sh, col1.hex);
+            spriteBatch.draw(font.getTexture(), 25 + offset, 500, sw, sh, col1);
+            
+            spriteBatch.drawString(font, "Hello!\nThere!\nMy name is Mattheus. I am a disciple of Durga, and I crush all who would appose Durga.\n" +
+                                                 "Convert or be burned at the stake for your sins.", 25, 550, col1);
+    
+    
+            spriteBatch.draw(durga, 700, 2, 500, 500, new Color(0xFFFFFFFF));
             
             spriteBatch.end();
             //spriteBatch.flush();
             graphicsDevice.frame();
             
-            sync.sync(60);
+            //sync.sync(60);
             
             end = glfwGetTime();
     
@@ -264,18 +238,25 @@ public class Main {
             if(elapsed >= 1) {
                 elapsed = 0;
                 System.out.println("FPS: " + frames + " drawing: " + width * height + " squares");
-                spriteBatch.setTotalDrawCalls(0L);
                 frames = 0;
             }
         }
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("hello");
-            program.dispose(); // prints Disposing
+            program.dispose();
+            spriteBatch.dispose();
+            graphicsDevice.dispose();
         }));
     }
     
-    private static float color(Random prng) {
-        return Float.floatToIntBits(prng.nextInt(2147483647) | (255) << 24);
+    private static Color color(Random prng) {
+        //return Float.floatToIntBits(prng.nextInt(2147483647) | (255) << 24);
+        //return Float.floatToIntBits(prng.nextInt(2147483647));
+        
+        float a = 1.0f;
+        //float a = (prng.nextFloat() > 0.5f) ? 1.0f : 0.0f;
+        //float a = prng.nextFloat();
+        
+        return new Color(prng.nextFloat(), prng.nextFloat(), prng.nextFloat(), a);
     }
 }

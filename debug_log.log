@@ -1,2 +1,2 @@
-[Debug:16:33:28] Using backend OpenGL | hedge.fx.display.GraphicsDevice line 181 | chooseBackend
-[Debug:16:33:28] Texture handle 1 | hedge.fx.app.GameApplication line 72 | run
+[Debug:16:33:28] Using backend OpenGL | com.fx.display.GraphicsDevice line 181 | chooseBackend
+[Debug:16:33:28] Texture handle 1 | com.fx.app.GameApplication line 72 | run

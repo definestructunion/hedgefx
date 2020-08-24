@@ -34,7 +34,7 @@ C  [lwjgl_stb.dll+0x263e4]
 Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
 j  org.lwjgl.stb.STBTruetype.nstbtt_PackFontRange(JJIFIIJ)I+0
 j  org.lwjgl.stb.STBTruetype.stbtt_PackFontRange(Lorg/lwjgl/stb/STBTTPackContext;Ljava/nio/ByteBuffer;IFILorg/lwjgl/stb/STBTTPackedchar$Buffer;)Z+22
-j  hedge.fx.graphics.Font.<init>(Lhedge/fx/io/files/FileHandle;IZLjava/lang/String;)V+91
+j  Font.<init>(Lhedge/fx/io/files/FileHandle;IZLjava/lang/String;)V+91
 j  Main.init()V+24
 j  Main.run()V+1
 j  Main.main([Ljava/lang/String;)V+126
