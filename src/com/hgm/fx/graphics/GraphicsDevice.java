@@ -120,12 +120,12 @@ public class GraphicsDevice implements NativeResource {
 				platformData.nwh(glfwGetWin32Window(handle));
 				break;
 			case MacOS:
-				platformData.ndt(glfwGetX11Display());
-				platformData.nwh(glfwGetX11Window(handle));
-				break;
-			case Linux:
 				platformData.ndt(0);
 				platformData.nwh(glfwGetCocoaWindow(handle));
+				break;
+			case Linux:
+				platformData.ndt(glfwGetX11Display());
+				platformData.nwh(glfwGetX11Window(handle));
 				break;
 		}
 		

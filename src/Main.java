@@ -200,9 +200,9 @@ public class Main {
             
             spriteBatch.begin();
     
-            int width = 512, height = 512;
-            int ps = 2;
-            int s = 2;
+            int width = 64, height = 64;
+            int ps = 16;
+            int s = 16;
             int sw = font.getTexture().getWidth();
             int sh = font.getTexture().getHeight();
             int subtractAmount = (height % 2 == 0) ? 1 : 1;
