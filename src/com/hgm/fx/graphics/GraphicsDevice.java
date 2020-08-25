@@ -127,6 +127,10 @@ public class GraphicsDevice implements NativeResource {
 				platformData.ndt(glfwGetX11Display());
 				platformData.nwh(glfwGetX11Window(handle));
 				break;
+			case Unix:
+				platformData.ndt(glfwGetX11Display());
+				platformData.nwh(glfwGetX11Window(handle));
+				break;
 		}
 		
 		glfwSetKeyCallback(handle, this::onKeyCallback);

@@ -33,8 +33,8 @@ public enum PlatformAPI {
 		String vm = System.getProperty("java.vm.name").toLowerCase();
 		
 		if(os.contains("win")) return Windows;
-		if(os.contains("nix")) return Linux;
-		if(os.contains("nux") || os.contains("aix")) return Unix;
+		if(os.contains("nux")) return Linux;
+		if(os.contains("nix") || os.contains("aix")) return Unix;
 		if(os.contains("mac") || os.contains("darwin")) return MacOS;
 		if(vm.equals("dalvik")) return Android;
 		// RoboVM is dead :'(
