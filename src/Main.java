@@ -1,22 +1,19 @@
-import com.hgm.fx.app.GameConfiguration;
-import com.hgm.fx.app.GameInitializer;
-import com.hgm.fx.graphics.*;
-import com.hgm.fx.graphics.renderers.SpriteBatch;
-import com.hgm.fx.io.files.FileHandle;
-import com.hgm.fx.io.files.FileType;
-import com.hgm.fx.math.Matrix4;
-import com.hgm.fx.platform.GraphicsAPI;
-import com.hgm.fx.util.Sync;
-import com.hgm.fx.util.logging.GameAppLogger;
-import com.hgm.fx.util.logging.ILogger;
+import com.hedgemen.fx.app.GameConfiguration;
+import com.hedgemen.fx.app.GameInitializer;
+import com.hedgemen.fx.graphics.*;
+import com.hedgemen.fx.io.files.FileHandle;
+import com.hedgemen.fx.io.files.FileType;
+import com.hedgemen.fx.math.Matrix4;
+import com.hedgemen.fx.platform.GraphicsAPI;
+import com.hedgemen.fx.platform.HedgeClassLoader;
+import com.hedgemen.fx.util.Sync;
+import com.hedgemen.fx.util.logging.GameAppLogger;
+import com.hedgemen.fx.util.logging.ILogger;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Library;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Random;
 
 import static org.lwjgl.bgfx.BGFX.*;
@@ -25,7 +22,19 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 
 public class Main {
 
+    private static HedgeClassLoader classLoader;
+    
     public static void main(String[] args) {
+        
+        classLoader = new HedgeClassLoader();
+        
+        try {
+            //URLClassLoader urlClassLoader = new URLClassLoader(new URL[] { Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().toURL() });
+            //Thread.currentThread().setContextClassLoader(urlClassLoader);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
         //Configuration.LIBRARY_PATH.set(new File("runtime/hedgefx").getAbsolutePath());
         Configuration.SHARED_LIBRARY_EXTRACT_DIRECTORY.set(new File("runtime/hedgefx").getAbsolutePath());
         Configuration.SHARED_LIBRARY_EXTRACT_PATH.set(new File("runtime/hedgefx").getAbsolutePath());
@@ -36,7 +45,7 @@ public class Main {
         config.setBackBufferHeight(720);
         config.setTitle("");
         config.setUseVSync(false);
-        config.setPreferredBackend(GraphicsAPI.OpenGL);
+        config.setPreferredBackend(GraphicsAPI.DirectX11);
         
         ILogger logger = new GameAppLogger();
         GameInitializer initializer = new GameInitializer(config, logger);
@@ -180,54 +189,131 @@ public class Main {
         int offset = 0;
     
         System.out.println(ClassLoader.getSystemClassLoader());
-    
-        URL url = null;
+        
         try {
-            url = new File("Test.jar").toURI().toURL();
+            /*URL url = new File("Test.jar").toURI().toURL();
             var testClass = Class.forName("Test", true, new URLClassLoader(new URL[] { url }));
             Object obj = testClass.getDeclaredConstructor().newInstance();
             Method method = testClass.getMethod("test");
-            method.invoke(obj);
+            method.invoke(obj);*/
+    
+            /*URL url = (new File("Test.jar").toURI().toURL());
+            URLClassLoader classLoader = new URLClassLoader(new URL[]{url});
+            Class<?> clz = classLoader.loadClass("Test");
+            Object main = clz.newInstance();
+            Method test = clz.getMethod("test");
+            test.invoke(main);*/
+            
+            /*Class<?> clz = ((URLClassLoader)ClassLoader.getSystemClassLoader()).loadClass("Test");
+            Object main = clz.newInstance();
+            Method test = clz.getMethod("test");
+            test.invoke(main);*/
+            
+            classLoader.addURL(new File("Test.jar").toURI().toURL());
+            Class<?> clz = classLoader.loadClass("Test");
+            Object main = clz.newInstance();
+            Method test = clz.getMethod("test");
+            test.invoke(main);
+            
         } catch(Exception e) {
             e.printStackTrace();
         }
         
+        int mx = 0;
+        int my = 0;
+        
+        boolean mr = true;
+        boolean ml = false;
+        boolean mu = false;
+        boolean md = false;
+        
         while(graphicsDevice.isRunning()) {
+            
+            if(mx == 200 && my == 0) {
+                mr = false;
+                ml = false;
+                mu = false;
+                md = true;
+            }
+    
+            if(mx == 200 && my == 200) {
+                mr = false;
+                ml = true;
+                mu = false;
+                md = false;
+            }
+    
+            if(mx == 0 && my == 200) {
+                mr = false;
+                ml = false;
+                mu = true;
+                md = false;
+            }
+    
+            if(mx == 0 && my == 0) {
+                mr = true;
+                ml = false;
+                mu = false;
+                md = false;
+            }
+            
+            if(mr) mx++;
+            if(ml) mx--;
+            if(mu) my--;
+            if(md) my++;
+            
             x += 1.0f;
             glfwPollEvents();
             
             start = glfwGetTime();
             
+            short frameBuffer = bgfx_create_frame_buffer(1280, 720, BGFX_TEXTURE_FORMAT_RGBA8, BGFX_SAMPLER_U_CLAMP |
+                                                                                                      BGFX_SAMPLER_V_CLAMP |
+                                                                                                      BGFX_SAMPLER_MIN_POINT |
+                                                                                                      BGFX_SAMPLER_MAG_POINT);
+            bgfx_set_view_frame_buffer(0, frameBuffer);
+            
             spriteBatch.begin();
     
-            int width = 64, height = 64;
-            int ps = 16;
-            int s = 16;
+            int width = 16, height = 16;
+            int ps = 4;
+            int s = 4;
             int sw = font.getTexture().getWidth();
             int sh = font.getTexture().getHeight();
             int subtractAmount = (height % 2 == 0) ? 1 : 1;
             for(int x = 0; x < width; ++x) {
                 for(int y = 0; y < height; ++y) {
-                    if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture3, x * ps + offset, y * ps + offset, s, s, color(prng));
+                    if(x == y || x == height - y - subtractAmount) spriteBatch.draw(texture3, x * ps + mx, y * ps + my, s, s, color(prng));
                     else
-                        spriteBatch.draw(texture4, x * ps + offset, y * ps + offset, s, s, color(prng));
+                        spriteBatch.draw(texture4, x * ps + mx, y * ps + my, s, s, color(prng));
                 }
             }
             
-            //++offset;
+            //++offset;*/
             
             spriteBatch.draw(font.getTexture(), 25 + offset, 500, sw, sh, col1);
             
-            spriteBatch.drawString(font, "Hello!\nThere!\nMy name is Mattheus. I am a disciple of Durga, and I crush all who would appose Durga.\n" +
-                                                 "Convert or be burned at the stake for your sins.", 25, 550, col1);
-    
+            spriteBatch.drawString(font, "Take\nThe\nDURGAPILL", 25, 550, col1);
     
             spriteBatch.draw(durga, 700, 2, 500, 500, new Color(0xFFFFFFFF));
+            spriteBatch.end();
+            graphicsDevice.frame();
+            bgfx_set_view_frame_buffer(0, BGFX_INVALID_HANDLE);
+    
+            Texture frameBufferTexture = new Texture(frameBuffer, 1280, 720);
             
+            //System.out.println(frameBuffer);
+            //System.out.println(frameBufferTexture.getHandle());
+            spriteBatch.begin();
+            //spriteBatch.draw(frameBufferTexture, 0, 0, graphicsDevice.getBackBufferWidth() / 2, graphicsDevice.getBackBufferHeight() / 2, Color.red());
+            
+            //spriteBatch.draw(frameBufferTexture, 0, 0, 400, 400,
+            //        (float)500 / 1280, (float)500 / 720, (500 + (float)700) / 1280, (500 + (float)2 / 720), Color.white());
+            spriteBatch.draw(frameBufferTexture, 0, 0, 1280, 720, Color.red());
             spriteBatch.end();
             //spriteBatch.flush();
+            //System.out.println(frameBufferTexture);
             graphicsDevice.frame();
-            
             //sync.sync(60);
             
             end = glfwGetTime();
@@ -240,6 +326,8 @@ public class Main {
                 System.out.println("FPS: " + frames + " drawing: " + width * height + " squares");
                 frames = 0;
             }
+            
+            bgfx_destroy_frame_buffer(frameBuffer);
         }
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -258,5 +346,6 @@ public class Main {
         //float a = prng.nextFloat();
         
         return new Color(prng.nextFloat(), prng.nextFloat(), prng.nextFloat(), a);
+        //return new Color(1, 1, 1, 1);
     }
 }
