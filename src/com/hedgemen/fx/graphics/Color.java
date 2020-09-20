@@ -33,16 +33,27 @@ public class Color implements Copy<Color> {
 	public static Color black() { return new Color(0.0f, 0.0f, 0.0f, 1.0f); }
 	public static Color darkGrey() { return new Color(0.15f, 0.15f, 0.15f, 1.0f); }
 	
+	/*@JsonIgnore
+	public float r;
 	@JsonIgnore
-	public final float r;
+	public float g;
 	@JsonIgnore
-	public final float g;
+	public float b;
 	@JsonIgnore
-	public final float b;
-	@JsonIgnore
-	public final float a;
+	public float a;
 	@JsonProperty("hex")
-	public final float hex;
+	public float hex;*/
+	
+	@JsonIgnore
+	public float r;
+	@JsonIgnore
+	public float g;
+	@JsonIgnore
+	public float b;
+	@JsonIgnore
+	public float a;
+	@JsonProperty("hex")
+	public float hex;
 	
 	@JsonCreator
 	public Color(@JsonProperty("hex") int rgbaHex) {

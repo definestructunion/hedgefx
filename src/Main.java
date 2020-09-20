@@ -1,3 +1,4 @@
+import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.app.GameConfiguration;
 import com.hedgemen.fx.app.GameInitializer;
 import com.hedgemen.fx.graphics.*;
@@ -14,6 +15,7 @@ import org.lwjgl.system.Library;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Random;
 
 import static org.lwjgl.bgfx.BGFX.*;
@@ -111,8 +113,8 @@ public class Main {
     Font font;
     
     private void init() {
-        FileHandle ttf = new FileHandle("Seagram tfb.ttf", FileType.Local);
-        //FileHandle ttf = new FileHandle("PIXELADE.TTF", FileType.Local);
+        //FileHandle ttf = new FileHandle("Seagram tfb.ttf", FileType.Local);
+        FileHandle ttf = new FileHandle("PIXELADE.TTF", FileType.Local);
         double start = 0, end = 0;
         start = glfwGetTime();
         try {
@@ -123,6 +125,8 @@ public class Main {
         end = glfwGetTime();
         
         System.out.println("Time taken: " + (end - start) + " MS");
+        
+        //font = new Font(new java.awt.Font("Helvetica", java.awt.Font.PLAIN, 16));
         
         /*String katakana = "アイウエオ";
         for(int i = 0; i < katakana.length(); ++i) {
@@ -163,9 +167,21 @@ public class Main {
         spriteBatch = new SpriteBatch(graphicsDevice, program);
     }
     
-    short frameBuffer;
-    
     Random prng = new Random();
+    
+    short startFrameBuffer() {
+        short frameBuffer = bgfx_create_frame_buffer(1280, 720, BGFX_TEXTURE_FORMAT_RGBA8, BGFX_SAMPLER_U_CLAMP |
+                                                                                                   BGFX_SAMPLER_V_CLAMP |
+                                                                                                   BGFX_SAMPLER_MIN_POINT |
+                                                                                                   BGFX_SAMPLER_MAG_POINT);
+        bgfx_set_view_frame_buffer(0, frameBuffer);
+        return frameBuffer;
+    }
+    
+    Texture endFrameBuffer(short frameBuffer) {
+        bgfx_set_view_frame_buffer(0, BGFX_INVALID_HANDLE);
+        return new Texture(frameBuffer, 1280, 720);
+    }
     
     float x = 0.0f;
     int frames = 0;
@@ -186,32 +202,14 @@ public class Main {
         double start = 0, end = 0;
         double elapsed = 0;
         
-        int offset = 0;
+        float offset = 0;
     
         System.out.println(ClassLoader.getSystemClassLoader());
         
         try {
-            /*URL url = new File("Test.jar").toURI().toURL();
-            var testClass = Class.forName("Test", true, new URLClassLoader(new URL[] { url }));
-            Object obj = testClass.getDeclaredConstructor().newInstance();
-            Method method = testClass.getMethod("test");
-            method.invoke(obj);*/
-    
-            /*URL url = (new File("Test.jar").toURI().toURL());
-            URLClassLoader classLoader = new URLClassLoader(new URL[]{url});
-            Class<?> clz = classLoader.loadClass("Test");
-            Object main = clz.newInstance();
-            Method test = clz.getMethod("test");
-            test.invoke(main);*/
-            
-            /*Class<?> clz = ((URLClassLoader)ClassLoader.getSystemClassLoader()).loadClass("Test");
-            Object main = clz.newInstance();
-            Method test = clz.getMethod("test");
-            test.invoke(main);*/
-            
             classLoader.addURL(new File("Test.jar").toURI().toURL());
             Class<?> clz = classLoader.loadClass("Test");
-            Object main = clz.newInstance();
+            Object main = clz.getDeclaredConstructor().newInstance();
             Method test = clz.getMethod("test");
             test.invoke(main);
             
@@ -226,6 +224,8 @@ public class Main {
         boolean ml = false;
         boolean mu = false;
         boolean md = false;
+    
+        ArrayList<Color> colors = new ArrayList<>();
         
         while(graphicsDevice.isRunning()) {
             
@@ -266,18 +266,14 @@ public class Main {
             glfwPollEvents();
             
             start = glfwGetTime();
-            
-            short frameBuffer = bgfx_create_frame_buffer(1280, 720, BGFX_TEXTURE_FORMAT_RGBA8, BGFX_SAMPLER_U_CLAMP |
-                                                                                                      BGFX_SAMPLER_V_CLAMP |
-                                                                                                      BGFX_SAMPLER_MIN_POINT |
-                                                                                                      BGFX_SAMPLER_MAG_POINT);
-            bgfx_set_view_frame_buffer(0, frameBuffer);
-            
-            spriteBatch.begin();
     
-            int width = 16, height = 16;
-            int ps = 4;
-            int s = 4;
+            Rasterizer rasterizer = new Rasterizer(graphicsDevice);
+    
+            rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
+            spriteBatch.begin(rasterizer);
+            int width = 12, height = 12;
+            int ps = 16;
+            int s = 16;
             int sw = font.getTexture().getWidth();
             int sh = font.getTexture().getHeight();
             int subtractAmount = (height % 2 == 0) ? 1 : 1;
@@ -288,34 +284,20 @@ public class Main {
                         spriteBatch.draw(texture4, x * ps + mx, y * ps + my, s, s, color(prng));
                 }
             }
-            
-            //++offset;*/
-            
-            spriteBatch.draw(font.getTexture(), 25 + offset, 500, sw, sh, col1);
-            
-            spriteBatch.drawString(font, "Take\nThe\nDURGAPILL", 25, 550, col1);
-    
-            spriteBatch.draw(durga, 700, 2, 500, 500, new Color(0xFFFFFFFF));
             spriteBatch.end();
-            graphicsDevice.frame();
-            bgfx_set_view_frame_buffer(0, BGFX_INVALID_HANDLE);
-    
-            Texture frameBufferTexture = new Texture(frameBuffer, 1280, 720);
             
-            //System.out.println(frameBuffer);
-            //System.out.println(frameBufferTexture.getHandle());
-            spriteBatch.begin();
-            //spriteBatch.draw(frameBufferTexture, 0, 0, graphicsDevice.getBackBufferWidth() / 2, graphicsDevice.getBackBufferHeight() / 2, Color.red());
-            
-            //spriteBatch.draw(frameBufferTexture, 0, 0, 400, 400,
-            //        (float)500 / 1280, (float)500 / 720, (500 + (float)700) / 1280, (500 + (float)2 / 720), Color.white());
-            spriteBatch.draw(frameBufferTexture, 0, 0, 1280, 720, Color.red());
+            rasterizer.setScissor(new Rectangle(0, 0, 150, 150));
+            spriteBatch.begin(rasterizer);
+            spriteBatch.draw(durga, 25, 25, 175, 175, Color.white());
             spriteBatch.end();
-            //spriteBatch.flush();
-            //System.out.println(frameBufferTexture);
-            graphicsDevice.frame();
-            //sync.sync(60);
             
+            rasterizer.setScissor(new Rectangle(400, 400, 400, 400));
+            spriteBatch.begin(rasterizer);
+            spriteBatch.draw(texture4, 350, 350, 450, 450, Color.white());
+            spriteBatch.end();
+            
+            graphicsDevice.frame();
+    
             end = glfwGetTime();
     
             elapsed += end - start;
@@ -323,11 +305,10 @@ public class Main {
     
             if(elapsed >= 1) {
                 elapsed = 0;
-                System.out.println("FPS: " + frames + " drawing: " + width * height + " squares");
+                System.out.println("FPS: " + frames);
                 frames = 0;
+                //System.gc();
             }
-            
-            bgfx_destroy_frame_buffer(frameBuffer);
         }
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -337,15 +318,15 @@ public class Main {
         }));
     }
     
+    private static Color staticColor = new Color(1, 1, 1, 1);
+    
     private static Color color(Random prng) {
-        //return Float.floatToIntBits(prng.nextInt(2147483647) | (255) << 24);
-        //return Float.floatToIntBits(prng.nextInt(2147483647));
-        
         float a = 1.0f;
-        //float a = (prng.nextFloat() > 0.5f) ? 1.0f : 0.0f;
-        //float a = prng.nextFloat();
-        
-        return new Color(prng.nextFloat(), prng.nextFloat(), prng.nextFloat(), a);
-        //return new Color(1, 1, 1, 1);
+        staticColor.r = prng.nextFloat();
+        staticColor.g = prng.nextFloat();
+        staticColor.b = prng.nextFloat();
+        staticColor.a = a;
+        staticColor.hex = Float.intBitsToFloat(((int)(255 * staticColor.a) << 24) | ((int)(255 * staticColor.b) << 16) | ((int)(255 * staticColor.g) << 8) | ((int)(255 * staticColor.r)));
+        return staticColor;
     }
 }

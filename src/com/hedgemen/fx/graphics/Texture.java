@@ -24,7 +24,7 @@ public class Texture implements BGFXResource {
 		handle = bgfx_get_texture(frameBufferHandle, 0);
 		this.width = width;
 		this.height = height;
-		bitsPerPixel = 1025; // todo lol
+		bitsPerPixel = 4; // todo lol
 	}
 	
 	public Texture(FileHandle file) {

@@ -1,5 +1,6 @@
 package com.hedgemen.fx.graphics;
 
+import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.graphics.buffers.*;
 import com.hedgemen.fx.util.Disposable;
 
@@ -14,9 +15,14 @@ public class SpriteBatch implements Disposable {
 	private ShaderProgram program;
 	private VertexLayout vertexLayout;
 	private Texture texture;
+	private Rasterizer rasterizer;
 	
 	private int index = 0;
 	private int buffersSize = 144;
+	
+	private boolean drawing = false;
+	
+	public ShaderProgram getProgram() { return program; }
 	
 	public SpriteBatch(GraphicsDevice graphicsDevice, ShaderProgram program) {
 		this.graphicsDevice = graphicsDevice;
@@ -25,6 +31,7 @@ public class SpriteBatch implements Disposable {
 		textureUniform = new ShaderUniform("texture", BGFX_UNIFORM_TYPE_VEC4, 1);
 		this.vertexLayout = createVertexLayout(createVertexAttributes());
 		vbo = new TransientVertexBuffer(buffersSize, vertexLayout, graphicsDevice);
+		rasterizer = createRasterizer();
 	}
 	
 	private IndexBuffer createIndexBuffer() {
@@ -42,6 +49,13 @@ public class SpriteBatch implements Disposable {
 		return new IndexBuffer(indices);
 	}
 	
+	private Rasterizer createRasterizer() {
+		Rasterizer rasterizer = new Rasterizer(graphicsDevice);
+		rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
+		
+		return rasterizer;
+	}
+	
 	private VertexAttributes createVertexAttributes() {
 		return new VertexAttributes(
 				new VertexAttribute(BGFX_ATTRIB_POSITION, 3, BGFX_ATTRIB_TYPE_FLOAT, false, false),
@@ -55,9 +69,15 @@ public class SpriteBatch implements Disposable {
 	}
 	
 	public void begin() {
+		begin(rasterizer);
+	}
+	
+	public void begin(Rasterizer rasterizer) {
 		//if(!allowDrawing()) return;
+		this.rasterizer = rasterizer;
 		graphicsDevice.getEncoder().begin();
 		vbo.allocate();
+		drawing = true;
 	}
 	
 	private void flush() {
@@ -67,13 +87,15 @@ public class SpriteBatch implements Disposable {
 		Encoder encoder = graphicsDevice.getEncoder();
 		
 		encoder.setState();
+		encoder.setScissor(rasterizer.getScissor());
 		encoder.setTexture(texture, textureUniform);
-		encoder.setTransientVertexBuffer(vbo, 0, buffersSize);
-		encoder.setIndexBuffer(ibo, 0, buffersSize);
+		encoder.setTransientVertexBuffer(vbo, 0, index);
+		encoder.setIndexBuffer(ibo, 0, index);
 		encoder.submit(program);
 		
 		index = 0;
 		encoder.end();
+		drawing = false;
 	}
 	
 	public void end() {
@@ -87,10 +109,18 @@ public class SpriteBatch implements Disposable {
 	}
 	
 	public void draw(Texture texture, float x, float y, float width, float height, float u0, float v0, float u1, float v1, Color color) {
+		if(!drawing) return;
+		
 		if(!allowDrawing()) return;
 		
 		if((!texture.equals(this.texture)) && (this.texture != null) ||
-			(index >= buffersSize - (vertexLayout.getAttributes().getStride()))) {
+			(index >= buffersSize)) {
+			flush();
+			begin();
+		}
+		
+		if((!texture.equals(this.texture)) && (this.texture != null) ||
+				   (index >= buffersSize - (vertexLayout.getAttributes().getStride()))) {
 			flush();
 			begin();
 		}
@@ -121,8 +151,18 @@ public class SpriteBatch implements Disposable {
 	}
 	
 	public void drawString(Font font, String text, int x, int y, Color color) {
+		if(!drawing) return;
+		//if(!allowDrawing()) return;
+		
+		if((!font.getTexture().equals(this.texture)) && (this.texture != null) ||
+				   (index >= buffersSize - (vertexLayout.getAttributes().getStride()))) {
+			flush();
+			begin();
+		}
 		
 		if(!allowDrawing()) return;
+		
+		this.texture = font.getTexture();
 		
 		float x0 = x;
 		float y0 = y;
@@ -132,7 +172,7 @@ public class SpriteBatch implements Disposable {
 			char c = text.charAt(i);
 			
 			if(c == '\n') {
-				y0 += font.getTexture().getHeight();
+				y0 += font.getTexture().getHeight() / 2.0f;
 				x0 = x;
 				continue;
 			}
@@ -166,9 +206,9 @@ public class SpriteBatch implements Disposable {
 	}
 	
 	private boolean allowDrawing() {
-		boolean allows = index + 6 <= buffersSize && vbo.canAllocate();
+		boolean allows = index <= buffersSize && vbo.canAllocate();
 		if(!allows) {
-			//System.out.println("[WARNING]: Not drawing any more sprites, buffers are full!");
+			System.out.println("[WARNING]: Not drawing any more sprites, buffers are full!");
 		}
 		return allows;
 	}

@@ -3,7 +3,6 @@ package com.hedgemen.fx.graphics;
 import com.hedgemen.fx.app.GameInitializer;
 import com.hedgemen.fx.platform.DisplayMode;
 import com.hedgemen.fx.platform.GraphicsAPI;
-import com.hedgemen.fx.platform.PlatformAPI;
 import com.hedgemen.fx.util.NativeResource;
 import org.lwjgl.bgfx.*;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -170,7 +169,7 @@ public class GraphicsDevice implements NativeResource {
 			throw new IllegalStateException("BGFX failed to initialize");
 		}
 		
-		var specification = new EncoderSpecification(false, BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
+		var specification = new EncoderSpecification(false, false, BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_BLEND_ALPHA);
 		encoder = new Encoder(specification, this);
 		
 		BGFXCaps caps = bgfx_get_caps();
@@ -190,9 +189,13 @@ public class GraphicsDevice implements NativeResource {
 	}
 	
 	public void frame() {
-		encoder.begin();
-		encoder.end();
-		bgfx_frame(false);
+		if(encoder.getSubmitCount() == 0) {
+			encoder.begin();
+			encoder.submit(null);
+			encoder.end();
+		}
+		
+		bgfx_frame(encoder.getSpecification().isDebug());
 	}
 	
 	public void show() {
@@ -224,47 +227,7 @@ public class GraphicsDevice implements NativeResource {
 	}
 	
 	private GraphicsDeviceListener createDefaultListener() {
-		return new GraphicsDeviceListener() {
-			@Override
-			public void onKeyCallback(int key, int scanCode, int action, int mods) {
-			
-			}
-			
-			@Override
-			public void onButtonCallback(int button, int action, int mods) {
-			
-			}
-			
-			@Override
-			public void onCursorPosCallback(double x, double y) {
-			
-			}
-			
-			@Override
-			public void onScrollWheelCallback(double xOffset, double yOffset) {
-			
-			}
-			
-			@Override
-			public void onWindowSizeCallback(int width, int height) {
-			
-			}
-			
-			@Override
-			public void onWindowMinimizedCallback() {
-			
-			}
-			
-			@Override
-			public void onWindowMaximizedCallback() {
-			
-			}
-			
-			@Override
-			public void onCharCallback(int codePoint) {
-			
-			}
-		};
+		return new DefaultGraphicsDeviceListener(this);
 	}
 	
 	private void errorCallback(int error, long description) {
@@ -311,6 +274,55 @@ public class GraphicsDevice implements NativeResource {
 	private void onCharCallback(long window, int codePoint) {
 		for(var listener : listeners) {
 			listener.onCharCallback(codePoint);
+		}
+	}
+	
+	private static class DefaultGraphicsDeviceListener implements GraphicsDeviceListener {
+		
+		private GraphicsDevice graphicsDevice;
+		
+		public DefaultGraphicsDeviceListener(GraphicsDevice graphicsDevice) {
+			this.graphicsDevice = graphicsDevice;
+		}
+		
+		@Override
+		public void onKeyCallback(int key, int scanCode, int action, int mods) {
+			System.out.println(key + " was pressed!");
+		}
+		
+		@Override
+		public void onButtonCallback(int button, int action, int mods) {
+		
+		}
+		
+		@Override
+		public void onCursorPosCallback(double x, double y) {
+		
+		}
+		
+		@Override
+		public void onScrollWheelCallback(double xOffset, double yOffset) {
+		
+		}
+		
+		@Override
+		public void onWindowSizeCallback(int width, int height) {
+		
+		}
+		
+		@Override
+		public void onWindowMinimizedCallback() {
+		
+		}
+		
+		@Override
+		public void onWindowMaximizedCallback() {
+		
+		}
+		
+		@Override
+		public void onCharCallback(int codePoint) {
+		
 		}
 	}
 }

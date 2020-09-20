@@ -9,8 +9,12 @@ public class EncoderSpecification {
 	public long getState() { return state; }
 	public void setState(long value) { state = value; }
 	
-	public EncoderSpecification(boolean multithreaded, long state) {
+	private boolean debug;
+	public boolean isDebug() { return debug; }
+	
+	public EncoderSpecification(boolean multithreaded, boolean debug, long state) {
 		this.multithreaded = multithreaded;
+		this.debug = debug;
 		this.state = state;
 	}
 }

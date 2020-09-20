@@ -22,10 +22,7 @@ public class ShaderProgram implements BGFXResource {
 		vertexMem = bgfx_copy(vertexFile.readByteBuffer());
 		short vertexShader = bgfx_create_shader(vertexMem);
 		
-		handle = bgfx_create_program(vertexShader, fragmentShader, false);
-		
-		bgfx_destroy_program(vertexShader);
-		bgfx_destroy_program(fragmentShader);
+		handle = bgfx_create_program(vertexShader, fragmentShader, true);
 	}
 	
 	@Override

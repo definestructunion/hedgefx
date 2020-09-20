@@ -1,5 +1,6 @@
 package com.hedgemen.fx.graphics;
 
+import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.graphics.buffers.IndexBuffer;
 import com.hedgemen.fx.graphics.buffers.TransientVertexBuffer;
 import com.hedgemen.fx.graphics.buffers.VertexBuffer;
@@ -15,6 +16,13 @@ public class Encoder {
 	private GraphicsDevice graphicsDevice;
 	
 	private EncoderSpecification specification;
+	public EncoderSpecification getSpecification() { return specification; }
+	
+	private boolean drawing;
+	public boolean isDrawing() { return drawing; }
+	
+	private int submitCount = 0;
+	public int getSubmitCount() { return submitCount; }
 	
 	public Encoder(EncoderSpecification specification, GraphicsDevice graphicsDevice) {
 		this.graphicsDevice = graphicsDevice;
@@ -23,14 +31,19 @@ public class Encoder {
 	
 	public void begin() {
 		handle = bgfx_encoder_begin(specification.isMultithreaded());
+		drawing = true;
+		submitCount = 0;
 	}
 	
 	public void end() {
 		bgfx_encoder_end(handle);
+		drawing = false;
 	}
 	
 	public void submit(ShaderProgram program) {
-		bgfx_encoder_submit(handle, 0, program.getHandle(), 0, false);
+		short programHandle = (program != null) ? program.getHandle() : (short)0;
+		bgfx_encoder_submit(handle, 0, programHandle, 0, false);
+		++submitCount;
 	}
 	
 	public void setState(long state) {
@@ -39,6 +52,14 @@ public class Encoder {
 	
 	public void setState() {
 		setState(specification.getState());
+	}
+	
+	public void setScissor(Rectangle scissor) {
+		bgfx_encoder_set_scissor(handle, scissor.x, scissor.y, scissor.width, scissor.height);
+	}
+	
+	public void setScissor(int x, int y, int width, int height) {
+		bgfx_encoder_set_scissor(handle, x, y, width, height);
 	}
 	
 	public void setTexture(@Nullable Texture texture, ShaderUniform uniform, int flags) {
