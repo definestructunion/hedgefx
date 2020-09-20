@@ -2,7 +2,7 @@ package com.hedgemen.fx.math;
 
 public class Vector2 {
 
-	public final float x, y;
+	public float x, y;
 
 	public Vector2() {
 		x = 0.0f;

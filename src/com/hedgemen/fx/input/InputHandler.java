@@ -1,6 +1,6 @@
 package com.hedgemen.fx.input;
 
-public interface InputHandler {
+public interface InputHandler extends KeyboardProvider, MouseProvider {
 
 	boolean isKeyDown(Keys key);
 	boolean isKeyPressed(Keys key);
@@ -8,7 +8,7 @@ public interface InputHandler {
 	boolean isButtonDown(Buttons button);
 	boolean isButtonPressed(Buttons button);
 	
-	boolean capsLockOn();
+	boolean isCapsLockOn();
 	boolean numLockOn();
 	
 	boolean anyKeyDown();
@@ -22,4 +22,6 @@ public interface InputHandler {
 	
 	boolean anyButtonsDown(Buttons[] buttons);
 	boolean anyButtonsPressed(Buttons[] buttons);
+	
+	String getTypedChars();
 }

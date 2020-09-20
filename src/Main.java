@@ -2,6 +2,8 @@ import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.app.GameConfiguration;
 import com.hedgemen.fx.app.GameInitializer;
 import com.hedgemen.fx.graphics.*;
+import com.hedgemen.fx.input.DefaultInputHandler;
+import com.hedgemen.fx.input.Keys;
 import com.hedgemen.fx.io.files.FileHandle;
 import com.hedgemen.fx.io.files.FileType;
 import com.hedgemen.fx.math.Matrix4;
@@ -47,12 +49,15 @@ public class Main {
         config.setBackBufferHeight(720);
         config.setTitle("");
         config.setUseVSync(false);
-        config.setPreferredBackend(GraphicsAPI.DirectX11);
+        config.setPreferredBackend(GraphicsAPI.OpenGL);
         
         ILogger logger = new GameAppLogger();
         GameInitializer initializer = new GameInitializer(config, logger);
     
         GraphicsDevice graphicsDevice = new GraphicsDevice(initializer);
+        
+        graphicsDevice.setTitle("Hedgemen");
+        graphicsDevice.applyChanges();
         
         Main mainObj = new Main(graphicsDevice, config);
         mainObj.run();
@@ -197,8 +202,6 @@ public class Main {
         bgfx_set_view_clear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, clearColor.hexInt(), 1.0f, 0);
         bgfx_reset(graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight(), config.useVSync() ? BGFX_RESET_VSYNC : BGFX_RESET_NONE, BGFX_TEXTURE_FORMAT_RGBA8);
         
-        graphicsDevice.show();
-        
         double start = 0, end = 0;
         double elapsed = 0;
         
@@ -226,6 +229,10 @@ public class Main {
         boolean md = false;
     
         ArrayList<Color> colors = new ArrayList<>();
+    
+        DefaultInputHandler inputHandler = new DefaultInputHandler();
+        graphicsDevice.addListener(inputHandler);
+        graphicsDevice.show();
         
         while(graphicsDevice.isRunning()) {
             
@@ -263,7 +270,12 @@ public class Main {
             if(md) my++;
             
             x += 1.0f;
-            glfwPollEvents();
+            graphicsDevice.pollEvents();
+    
+            if(inputHandler.getTypedChars().length() > 0)
+                System.out.println(inputHandler.getTypedChars());
+    
+            inputHandler.update();
             
             start = glfwGetTime();
     
@@ -271,7 +283,7 @@ public class Main {
     
             rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
             spriteBatch.begin(rasterizer);
-            int width = 12, height = 12;
+            int width = 256, height = 256;
             int ps = 16;
             int s = 16;
             int sw = font.getTexture().getWidth();
@@ -295,6 +307,11 @@ public class Main {
             spriteBatch.begin(rasterizer);
             spriteBatch.draw(texture4, 350, 350, 450, 450, Color.white());
             spriteBatch.end();
+    
+            rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
+            spriteBatch.begin(rasterizer);
+            spriteBatch.draw(texture4, inputHandler.cursorPosX(), inputHandler.cursorPosY(), 75, 75, Color.white());
+            spriteBatch.end();
             
             graphicsDevice.frame();
     
@@ -302,6 +319,8 @@ public class Main {
     
             elapsed += end - start;
             frames++;
+            
+            sync.sync(60);
     
             if(elapsed >= 1) {
                 elapsed = 0;

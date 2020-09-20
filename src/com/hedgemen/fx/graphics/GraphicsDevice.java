@@ -5,6 +5,7 @@ import com.hedgemen.fx.platform.DisplayMode;
 import com.hedgemen.fx.platform.GraphicsAPI;
 import com.hedgemen.fx.util.NativeResource;
 import org.lwjgl.bgfx.*;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryStack;
 
@@ -52,6 +53,14 @@ public class GraphicsDevice implements NativeResource {
 	public Encoder getEncoder() { return encoder; }
 	
 	private List<GraphicsDeviceListener> listeners;
+	
+	public void addListener(GraphicsDeviceListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeListener(GraphicsDeviceListener listener) {
+		listeners.removeIf(e -> e.getClass().equals(listener.getClass()));
+	}
 	
 	public GraphicsDevice(GameInitializer initializer) {
 		var config = initializer.getConfig();
@@ -155,7 +164,6 @@ public class GraphicsDevice implements NativeResource {
 		bgfx_init_ctor(initData);
 		initData.platformData(platformData);
 		initData.resolution(resolutionData);
-		//initData.limits(initLimitsData);
 		initData.limits().transientVbSize(0xFFFFFFF);
 		initData.limits().transientIbSize(0xFFFFFFF);
 		initData.limits().maxEncoders((short)1);
@@ -181,7 +189,7 @@ public class GraphicsDevice implements NativeResource {
 		stack.close();
 		
 		applyChanges();
-		listeners.add(createDefaultListener());
+		addListener(createDefaultListener());
 	}
 	
 	int getBit(int n, int k) {
@@ -217,6 +225,8 @@ public class GraphicsDevice implements NativeResource {
 	public void applyChanges() {
 		bgfx_set_view_clear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, clearColor.hexInt(), 1.0f, 0);
 		bgfx_set_view_rect(0, 0, 0, backBufferWidth, backBufferHeight);
+		
+		glfwSetWindowTitle(handle, title);
 	}
 	
 	@Override
@@ -231,7 +241,7 @@ public class GraphicsDevice implements NativeResource {
 	}
 	
 	private void errorCallback(int error, long description) {
-	
+		System.out.println("[GLFW] Error "  + error + ": " + GLFWErrorCallback.getDescription(description));
 	}
 	
 	private void onKeyCallback(long window, int key, int scanCode, int action, int mods) {
@@ -287,7 +297,7 @@ public class GraphicsDevice implements NativeResource {
 		
 		@Override
 		public void onKeyCallback(int key, int scanCode, int action, int mods) {
-			System.out.println(key + " was pressed!");
+		
 		}
 		
 		@Override

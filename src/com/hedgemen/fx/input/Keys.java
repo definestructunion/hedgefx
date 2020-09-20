@@ -1,6 +1,8 @@
 package com.hedgemen.fx.input;
 
-public enum Keys{
+import java.util.HashMap;
+
+public enum Keys {
 	Unknown      (-1),
 	Space        (32),
 	Apostrophe   (39),
@@ -131,11 +133,9 @@ public enum Keys{
 	
 	// noShiftChar = ''; shiftChar = ''; break;
 	
-	Keys(int value)
-	{
+	Keys(int value) {
 		this.value = value;
-		switch(value)
-		{
+		switch(value) {
 			case -1: lowChar = '\u0000'; upChar = '\u0000'; break;
 			case 32: lowChar = ' '; upChar = ' '; break;
 			case 39: lowChar = '\''; upChar = '\"'; break;
@@ -200,5 +200,20 @@ public enum Keys{
 			case 330: lowChar = '0'; upChar = '0'; break;
 			default: lowChar = '\u0000'; upChar = '\u0000'; break;
 		}
+	}
+	
+	private static HashMap<Integer, Keys> keyValueMap;
+	
+	static {
+		Keys[] keys = Keys.values();
+		keyValueMap = new HashMap<>(keys.length);
+		
+		for(Keys key : keys) {
+			keyValueMap.put(key.value, key);
+		}
+	}
+	
+	public static Keys fromValue(int key) {
+		return keyValueMap.get(key);
 	}
 }
