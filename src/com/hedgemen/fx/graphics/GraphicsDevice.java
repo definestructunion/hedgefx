@@ -1,11 +1,14 @@
 package com.hedgemen.fx.graphics;
 
 import com.hedgemen.fx.app.GameInitializer;
+import com.hedgemen.fx.io.files.FileHandle;
+import com.hedgemen.fx.io.files.FileType;
 import com.hedgemen.fx.platform.DisplayMode;
 import com.hedgemen.fx.platform.GraphicsAPI;
 import com.hedgemen.fx.util.NativeResource;
 import org.lwjgl.bgfx.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryStack;
 
@@ -187,6 +190,15 @@ public class GraphicsDevice implements NativeResource {
 		System.out.println("Texture 2D Arrays: " + (getBit((int)supported, (int)BGFX_CAPS_TEXTURE_2D_ARRAY)));
 		
 		stack.close();
+		
+		GLFWImage.Buffer image = GLFWImage.calloc(1);
+		var imageData = Texture.loadData(new FileHandle("116.jpg", FileType.Local));
+		image.pixels(imageData.getValue0());
+		image.width(imageData.getValue1());
+		image.height(imageData.getValue2());
+		glfwSetWindowIcon(handle, image);
+		
+		Texture.freeData(imageData);
 		
 		applyChanges();
 		addListener(createDefaultListener());

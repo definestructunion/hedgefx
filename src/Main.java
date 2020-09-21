@@ -49,7 +49,7 @@ public class Main {
         config.setBackBufferHeight(720);
         config.setTitle("");
         config.setUseVSync(false);
-        config.setPreferredBackend(GraphicsAPI.OpenGL);
+        config.setPreferredBackend(GraphicsAPI.DirectX11);
         
         ILogger logger = new GameAppLogger();
         GameInitializer initializer = new GameInitializer(config, logger);
@@ -283,7 +283,7 @@ public class Main {
     
             rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
             spriteBatch.begin(rasterizer);
-            int width = 256, height = 256;
+            int width = 50, height = 50;
             int ps = 16;
             int s = 16;
             int sw = font.getTexture().getWidth();
@@ -310,18 +310,17 @@ public class Main {
     
             rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
             spriteBatch.begin(rasterizer);
-            spriteBatch.draw(texture4, inputHandler.cursorPosX(), inputHandler.cursorPosY(), 75, 75, Color.white());
+            spriteBatch.draw(texture4, inputHandler.cursorPosX() - (75 / 2), inputHandler.cursorPosY() - (75 / 2), 75, 75, Color.white());
             spriteBatch.end();
             
             graphicsDevice.frame();
-    
-            end = glfwGetTime();
-    
-            elapsed += end - start;
-            frames++;
             
             sync.sync(60);
     
+            end = glfwGetTime();
+            elapsed += end - start;
+            frames++;
+            
             if(elapsed >= 1) {
                 elapsed = 0;
                 System.out.println("FPS: " + frames);

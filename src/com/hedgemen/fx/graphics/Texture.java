@@ -2,6 +2,7 @@ package com.hedgemen.fx.graphics;
 
 import com.hedgemen.fx.io.files.FileHandle;
 import com.hedgemen.fx.util.BGFXResource;
+import com.hedgemen.fx.util.tuples.Triplet;
 import org.lwjgl.bgfx.BGFXMemory;
 
 import java.nio.ByteBuffer;
@@ -45,6 +46,19 @@ public class Texture implements BGFXResource {
 		/*handle = bgfx_create_texture_2d(this.width, this.height, false, 1, BGFX_TEXTURE_FORMAT_RGBA8,
 				BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP |
 						BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT, imageMem);*/
+	}
+	
+	public static Triplet<ByteBuffer, Integer, Integer> loadData(FileHandle file) {
+		int[] width = new int[1];
+		int[] height = new int[1];
+		int[] bitsPerPixel = new int[1];
+		
+		var buffer = stbi_load_from_memory(file.readByteBuffer(), width, height, bitsPerPixel, 4);
+		return new Triplet<>(buffer, width[0], height[0]);
+	}
+	
+	public static void freeData(Triplet<ByteBuffer, Integer, Integer> data) {
+		stbi_image_free(data.getValue0());
 	}
 	
 	private void load(FileHandle file) {
