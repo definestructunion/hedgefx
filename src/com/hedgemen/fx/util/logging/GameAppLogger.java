@@ -6,7 +6,7 @@ import com.hedgemen.fx.math.Mathf;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GameAppLogger implements ILogger {
+public class GameAppLogger implements Logger {
 	
 	private DateTimeFormatter dtf;
 	private StringBuilder log;

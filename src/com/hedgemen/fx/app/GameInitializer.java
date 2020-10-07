@@ -1,7 +1,7 @@
 package com.hedgemen.fx.app;
 
 import com.hedgemen.fx.platform.PlatformAPI;
-import com.hedgemen.fx.util.logging.ILogger;
+import com.hedgemen.fx.util.logging.Logger;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Library;
 
@@ -12,13 +12,13 @@ public final class GameInitializer {
 	private GameConfiguration config;
 	public GameConfiguration getConfig() { return config; }
 	
-	private ILogger logger;
-	public ILogger getLogger() { return logger; }
+	private Logger logger;
+	public Logger getLogger() { return logger; }
 	
 	private PlatformAPI platform;
 	public PlatformAPI getPlatform() { return platform; }
 	
-	public GameInitializer(GameConfiguration config, ILogger logger) {
+	public GameInitializer(GameConfiguration config, Logger logger) {
 		this.config = config;
 		this.logger = logger;
 		this.platform = PlatformAPI.getPlatform();

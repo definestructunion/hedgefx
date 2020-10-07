@@ -4,9 +4,9 @@ import com.hedgemen.fx.util.copying.Copy;
 
 public class Vector3 implements Copy<Vector3>
 {
-	public final float x;
-	public final float y;
-	public final float z;
+	public float x;
+	public float y;
+	public float z;
 	
 	public Vector3(float x, float y, float z) {
 		this.x = x;
@@ -21,27 +21,45 @@ public class Vector3 implements Copy<Vector3>
 	}
 	
 	public Vector3 add(Vector3 vec) {
-		return new Vector3(x + vec.x, y + vec.y, z + vec.z);
+		x += vec.x;
+		y += vec.y;
+		z += vec.z;
+		return this;
 	}
 	
 	public Vector3 sub(Vector3 vec) {
-		return new Vector3(x - vec.x, y - vec.y, z - vec.z);
+		x -= vec.x;
+		y -= vec.y;
+		z -= vec.z;
+		return this;
 	}
 	
 	public Vector3 mult(float value) {
-		return new Vector3(x * value, y * value, z * value);
+		x *= value;
+		y *= value;
+		z *= value;
+		return this;
 	}
 	
 	public Vector3 mult(Vector3 vec) {
-		return new Vector3(x * vec.x, y * vec.y, z * vec.z);
+		x *= vec.x;
+		y *= vec.y;
+		z *= vec.z;
+		return this;
 	}
 	
 	public Vector3 div(Vector3 vec) {
-		return new Vector3(x / vec.x, y / vec.y, z / vec.z);
+		x /= vec.x;
+		y /= vec.y;
+		z /= vec.z;
+		return this;
 	}
 	
 	public Vector3 set(Vector3 vec) {
-		return new Vector3(vec.x, vec.y, vec.z);
+		x = vec.x;
+		y = vec.y;
+		z = vec.z;
+		return this;
 	}
 	
 	public Vector3 dotProduct(Vector3 vec) {

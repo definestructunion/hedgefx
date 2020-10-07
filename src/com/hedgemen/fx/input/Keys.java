@@ -204,8 +204,11 @@ public enum Keys {
 	
 	private static HashMap<Integer, Keys> keyValueMap;
 	
+	private static Keys[] keyOrdinal;
+	
 	static {
 		Keys[] keys = Keys.values();
+		keyOrdinal = keys;
 		keyValueMap = new HashMap<>(keys.length);
 		
 		for(Keys key : keys) {
@@ -215,5 +218,9 @@ public enum Keys {
 	
 	public static Keys fromValue(int key) {
 		return keyValueMap.get(key);
+	}
+	
+	public static Keys fromOrdinal(int ordinal) {
+		return keyOrdinal[ordinal];
 	}
 }

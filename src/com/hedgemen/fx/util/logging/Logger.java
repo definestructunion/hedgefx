@@ -2,7 +2,7 @@ package com.hedgemen.fx.util.logging;
 
 import com.hedgemen.fx.io.files.FileHandle;
 
-public interface ILogger {
+public interface Logger {
 	
 	void setPattern(String value);
 	void setColorOutput(boolean value);

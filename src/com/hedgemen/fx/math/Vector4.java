@@ -4,10 +4,10 @@ import com.hedgemen.fx.util.copying.Copy;
 
 public class Vector4 implements Copy<Vector4>
 {
-	public final float x;
-	public final float y;
-	public final float z;
-	public final float w;
+	public float x;
+	public float y;
+	public float z;
+	public float w;
 	
 	public Vector4(float x, float y, float z, float w) {
 		this.x = x;
@@ -24,27 +24,51 @@ public class Vector4 implements Copy<Vector4>
 	}
 	
 	public Vector4 add(Vector4 vec) {
-		return new Vector4(x + vec.x, y + vec.y, z + vec.z, w + vec.w);
+		x += vec.x;
+		y += vec.y;
+		z += vec.z;
+		w += vec.w;
+		return this;
 	}
 	
 	public Vector4 sub(Vector4 vec) {
-		return new Vector4(x - vec.x, y - vec.y, z - vec.z, w - vec.w);
+		x -= vec.x;
+		y -= vec.y;
+		z -= vec.z;
+		w -= vec.w;
+		return this;
 	}
 	
 	public Vector4 mult(float value) {
-		return new Vector4(x * value, y * value, z * value, w * value);
+		x += value;
+		y += value;
+		z += value;
+		w += value;
+		return this;
 	}
 	
 	public Vector4 mult(Vector4 vec) {
-		return new Vector4(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
+		x *= vec.x;
+		y *= vec.y;
+		z *= vec.z;
+		w *= vec.w;
+		return this;
 	}
 	
 	public Vector4 div(Vector4 vec) {
-		return new Vector4(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
+		x /= vec.x;
+		y /= vec.y;
+		z /= vec.z;
+		w /= vec.w;
+		return this;
 	}
 	
 	public Vector4 set(Vector4 vec) {
-		return new Vector4(vec.x, vec.y, vec.z, vec.w);
+		x = vec.x;
+		y = vec.y;
+		z = vec.z;
+		w = vec.w;
+		return this;
 	}
 	
 	@Override

@@ -197,7 +197,6 @@ public class GraphicsDevice implements NativeResource {
 		image.width(imageData.getValue1());
 		image.height(imageData.getValue2());
 		glfwSetWindowIcon(handle, image);
-		
 		Texture.freeData(imageData);
 		
 		applyChanges();
@@ -238,6 +237,7 @@ public class GraphicsDevice implements NativeResource {
 		bgfx_set_view_clear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, clearColor.hexInt(), 1.0f, 0);
 		bgfx_set_view_rect(0, 0, 0, backBufferWidth, backBufferHeight);
 		
+		glfwSetWindowSize(handle, backBufferWidth, backBufferHeight);
 		glfwSetWindowTitle(handle, title);
 	}
 	

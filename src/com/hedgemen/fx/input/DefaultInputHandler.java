@@ -2,6 +2,9 @@ package com.hedgemen.fx.input;
 
 import com.hedgemen.fx.math.Vector2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class DefaultInputHandler implements InputHandler {
@@ -38,22 +41,48 @@ public class DefaultInputHandler implements InputHandler {
 	
 	@Override
 	public boolean isKeyDown(Keys key) {
-		return downKeys[key.value];
+		return downKeys[key.ordinal()];
 	}
 	
 	@Override
 	public boolean isKeyPressed(Keys key) {
-		return pressedKeys[key.value];
+		return pressedKeys[key.ordinal()];
 	}
 	
 	@Override
 	public boolean isButtonDown(Buttons button) {
-		return downButtons[button.value];
+		return downButtons[button.ordinal()];
+	}
+	
+	@Override
+	public List<Keys> getKeysDown() {
+		var keysDown = new ArrayList<Keys>(4);
+		
+		for(int i = 0; i < frameKeys.length; ++i) {
+			var key = Keys.fromOrdinal(i);
+			var fired = isKeyDown(key);
+			if(fired) keysDown.add(key);
+		}
+		
+		return keysDown;
+	}
+	
+	@Override
+	public List<Keys> getKeysPressed() {
+		var keysPressed = new ArrayList<Keys>(4);
+		
+		for(int i = 0; i < frameKeys.length; ++i) {
+			var key = Keys.fromOrdinal(i);
+			var fired = isKeyPressed(key);
+			if(fired) keysPressed.add(key);
+		}
+		
+		return keysPressed;
 	}
 	
 	@Override
 	public boolean isButtonPressed(Buttons button) {
-		return pressedButtons[button.value];
+		return pressedButtons[button.ordinal()];
 	}
 	
 	@Override
@@ -83,26 +112,6 @@ public class DefaultInputHandler implements InputHandler {
 	
 	@Override
 	public boolean anyButtonPressed() {
-		return false;
-	}
-	
-	@Override
-	public boolean anyKeysDown(Keys[] keys) {
-		return false;
-	}
-	
-	@Override
-	public boolean anyKeysPressed(Keys[] keys) {
-		return false;
-	}
-	
-	@Override
-	public boolean anyButtonsDown(Buttons[] buttons) {
-		return false;
-	}
-	
-	@Override
-	public boolean anyButtonsPressed(Buttons[] buttons) {
 		return false;
 	}
 	
@@ -137,6 +146,46 @@ public class DefaultInputHandler implements InputHandler {
 		
 		System.arraycopy(frameButtons, 0, downButtons, 0, frameButtons.length);
 		typedCharacters.delete(0, typedCharacters.length());
+	}
+	
+	@Override
+	public boolean anyKeysDown(Keys[] keys) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyKeysPressed(Keys[] keys) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyButtonsDown(Buttons[] buttons) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyButtonsPressed(Buttons[] buttons) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyKeysDown(List<Keys> keys) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyKeysPressed(List<Keys> keys) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyButtonsDown(List<Buttons> buttons) {
+		return false;
+	}
+	
+	@Override
+	public boolean anyButtonsPressed(List<Buttons> buttons) {
+		return false;
 	}
 	
 	@Override

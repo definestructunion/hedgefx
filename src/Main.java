@@ -2,7 +2,10 @@ import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.app.GameConfiguration;
 import com.hedgemen.fx.app.GameInitializer;
 import com.hedgemen.fx.graphics.*;
+import com.hedgemen.fx.graphics.buffers.FrameBuffer;
+import com.hedgemen.fx.input.Buttons;
 import com.hedgemen.fx.input.DefaultInputHandler;
+import com.hedgemen.fx.input.InputHandler;
 import com.hedgemen.fx.input.Keys;
 import com.hedgemen.fx.io.files.FileHandle;
 import com.hedgemen.fx.io.files.FileType;
@@ -11,7 +14,7 @@ import com.hedgemen.fx.platform.GraphicsAPI;
 import com.hedgemen.fx.platform.HedgeClassLoader;
 import com.hedgemen.fx.util.Sync;
 import com.hedgemen.fx.util.logging.GameAppLogger;
-import com.hedgemen.fx.util.logging.ILogger;
+import com.hedgemen.fx.util.logging.Logger;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.Library;
 
@@ -22,22 +25,24 @@ import java.util.Random;
 
 import static org.lwjgl.bgfx.BGFX.*;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 
 public class Main {
 
+    public static class DrawInfo {
+        
+        public float x, y, width, height;
+        public Texture texture;
+    }
+    
+    private static ArrayList<DrawInfo> draws = new ArrayList<>();
+    
+    private static StringBuilder typed = new StringBuilder();
+    
     private static HedgeClassLoader classLoader;
     
     public static void main(String[] args) {
         
         classLoader = new HedgeClassLoader();
-        
-        try {
-            //URLClassLoader urlClassLoader = new URLClassLoader(new URL[] { Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().toURL() });
-            //Thread.currentThread().setContextClassLoader(urlClassLoader);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
         
         //Configuration.LIBRARY_PATH.set(new File("runtime/hedgefx").getAbsolutePath());
         Configuration.SHARED_LIBRARY_EXTRACT_DIRECTORY.set(new File("runtime/hedgefx").getAbsolutePath());
@@ -51,11 +56,13 @@ public class Main {
         config.setUseVSync(false);
         config.setPreferredBackend(GraphicsAPI.DirectX11);
         
-        ILogger logger = new GameAppLogger();
+        Logger logger = new GameAppLogger();
         GameInitializer initializer = new GameInitializer(config, logger);
     
         GraphicsDevice graphicsDevice = new GraphicsDevice(initializer);
         
+        graphicsDevice.setBackBufferWidth(1280);
+        graphicsDevice.setBackBufferHeight(720);
         graphicsDevice.setTitle("Hedgemen");
         graphicsDevice.applyChanges();
         
@@ -101,12 +108,21 @@ public class Main {
     Texture texture3;
     Texture texture4;
     
+    Texture[] textures;
+    
     private void loadTexture() {
         texture3 = new Texture(new FileHandle("bunny.jpg", FileType.Local));
         texture = new Texture(new FileHandle("smile.png", FileType.Local));
         texture2 = new Texture(new FileHandle("heart.png", FileType.Local));
         durga = new Texture(new FileHandle("durga.png", FileType.Local));
         texture4 = new Texture(new FileHandle("116.jpg", FileType.Local));
+        
+        textures = new Texture[5];
+        textures[0] = texture;
+        textures[1] = texture2;
+        textures[2] = texture3;
+        textures[3] = durga;
+        textures[4] = texture4;
     }
     
     ShaderProgram program;
@@ -174,20 +190,6 @@ public class Main {
     
     Random prng = new Random();
     
-    short startFrameBuffer() {
-        short frameBuffer = bgfx_create_frame_buffer(1280, 720, BGFX_TEXTURE_FORMAT_RGBA8, BGFX_SAMPLER_U_CLAMP |
-                                                                                                   BGFX_SAMPLER_V_CLAMP |
-                                                                                                   BGFX_SAMPLER_MIN_POINT |
-                                                                                                   BGFX_SAMPLER_MAG_POINT);
-        bgfx_set_view_frame_buffer(0, frameBuffer);
-        return frameBuffer;
-    }
-    
-    Texture endFrameBuffer(short frameBuffer) {
-        bgfx_set_view_frame_buffer(0, BGFX_INVALID_HANDLE);
-        return new Texture(frameBuffer, 1280, 720);
-    }
-    
     float x = 0.0f;
     int frames = 0;
     public void run() {
@@ -230,9 +232,11 @@ public class Main {
     
         ArrayList<Color> colors = new ArrayList<>();
     
-        DefaultInputHandler inputHandler = new DefaultInputHandler();
+        InputHandler inputHandler = new DefaultInputHandler();
         graphicsDevice.addListener(inputHandler);
         graphicsDevice.show();
+    
+        FrameBuffer frameBuffer = new FrameBuffer(graphicsDevice);
         
         while(graphicsDevice.isRunning()) {
             
@@ -272,9 +276,28 @@ public class Main {
             x += 1.0f;
             graphicsDevice.pollEvents();
     
-            if(inputHandler.getTypedChars().length() > 0)
-                System.out.println(inputHandler.getTypedChars());
-    
+            if(inputHandler.isButtonDown(Buttons.Left)) {
+                DrawInfo drawInfo = new DrawInfo();
+                drawInfo.texture = textures[prng.nextInt(5)];
+                drawInfo.width = 75;
+                drawInfo.height = 75;
+                drawInfo.x = inputHandler.cursorPosX() - (drawInfo.width / 2);
+                drawInfo.y = inputHandler.cursorPosY() - (drawInfo.height / 2);
+                draws.add(drawInfo);
+            } else if(inputHandler.isKeyPressed(Keys.Escape)) {
+                draws.clear();
+            }
+            
+            typed.append(inputHandler.getTypedChars());
+            
+            if(inputHandler.isKeyPressed(Keys.Backspace)) {
+                typed.delete(Math.max(0, typed.length() - 1), typed.length());
+            }
+            
+            for(var key : inputHandler.getKeysPressed()) {
+                System.out.println(key);
+            }
+            
             inputHandler.update();
             
             start = glfwGetTime();
@@ -308,9 +331,28 @@ public class Main {
             spriteBatch.draw(texture4, 350, 350, 450, 450, Color.white());
             spriteBatch.end();
     
+            long totalMemory = Runtime.getRuntime().totalMemory() / 1000000;
+            long usedMemory = (Runtime.getRuntime().totalMemory() -Runtime.getRuntime().freeMemory()) / 1000000;
+            
             rasterizer.setScissor(new Rectangle(0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight()));
+            
+            frameBuffer.begin();
+            
             spriteBatch.begin(rasterizer);
-            spriteBatch.draw(texture4, inputHandler.cursorPosX() - (75 / 2), inputHandler.cursorPosY() - (75 / 2), 75, 75, Color.white());
+            
+            for(DrawInfo drawInfo : draws) {
+                spriteBatch.draw(drawInfo.texture, drawInfo.x, drawInfo.y, drawInfo.width, drawInfo.height, Color.white());
+            }
+            
+            spriteBatch.drawString(font, (usedMemory + "/" + totalMemory + " MB"), 1000, 500, Color.red());
+            spriteBatch.drawString(font, typed.toString(), 10, 10, Color.black());
+            spriteBatch.end();
+            
+            graphicsDevice.frame();
+            
+            Texture frameBufferTexture = frameBuffer.end();
+            spriteBatch.begin(rasterizer);
+            spriteBatch.draw(frameBufferTexture, 0, 0, graphicsDevice.getBackBufferWidth(), graphicsDevice.getBackBufferHeight(), Color.white());
             spriteBatch.end();
             
             graphicsDevice.frame();
