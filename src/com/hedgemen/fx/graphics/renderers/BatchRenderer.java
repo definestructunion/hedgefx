@@ -4,6 +4,7 @@ import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.graphics.*;
 import com.hedgemen.fx.graphics.buffers.*;
 import com.hedgemen.fx.math.Vector2;
+import org.jetbrains.annotations.Nullable;
 
 import static org.lwjgl.bgfx.BGFX.*;
 import static org.lwjgl.bgfx.BGFX.BGFX_ATTRIB_TYPE_UINT8;
@@ -16,12 +17,16 @@ public class BatchRenderer implements Renderer {
 	private ShaderProgram shaderProgram;
 	private VertexLayout vertexLayout;
 	
+	private Color defaultColor;
+	
 	private int index = 0;
 	private int buffersSize = 144;
 	
 	public BatchRenderer(ShaderProgram shaderProgram, GraphicsDevice graphicsDevice) {
 		this.shaderProgram = shaderProgram;
 		this.graphicsDevice = graphicsDevice;
+		
+		defaultColor = Color.white();
 		
 		vertexLayout = createVertexLayout(createVertexAttributes());
 		ibo = createIndexBuffer();
@@ -75,7 +80,7 @@ public class BatchRenderer implements Renderer {
 	}
 	
 	@Override
-	public void draw(Texture texture, float x, float y, float w, float h, float rx, float ry, float rw, float rh, Color color, float rotation, float originX, float originY) {
+	public void draw(Texture texture, float x, float y, float w, float h, float u0, float v0, float u1, float v1, Color color, float rotation, float originX, float originY) {
 	
 	}
 	
@@ -85,25 +90,58 @@ public class BatchRenderer implements Renderer {
 	}
 	
 	@Override
-	public void draw(Texture texture, Rectangle dimensions, Rectangle textureCoords, Color color, float rotation, Vector2 origin) {
-		draw(texture,
-				dimensions.x, dimensions.y, dimensions.width, dimensions.height,
-				textureCoords.x, textureCoords.y, textureCoords.width, textureCoords.height,
-				color,
-				rotation,
-				origin.x, origin.y);
+	public void draw(Texture texture, Rectangle dimensions, @Nullable Rectangle textureCoords, @Nullable Color color, float rotation, @Nullable Vector2 origin) {
+		float x, y, w, h;
+		x = dimensions.x;
+		y = dimensions.y;
+		w = dimensions.width;
+		h = dimensions.height;
+		
+		float u0, v0, u1, v1;
+		if(textureCoords != null) {
+			u0 = textureCoords.x;
+			v0 = textureCoords.y;
+			u1 = textureCoords.width;
+			v1 = textureCoords.height;
+		} else {
+			u0 = 0;
+			v0 = 0;
+			u1 = 1;
+			v1 = 1;
+		}
+		
+		Color drawColor = (color != null) ? color : defaultColor;
+		
+		float rotX, rotY;
+		if(origin != null) {
+			rotX = origin.x;
+			rotY = origin.y;
+		} else {
+			rotX = 0.0f;
+			rotY = 0.0f;
+		}
+		
+		draw(texture, x, y, w, h, u0, v0, u1, v1, color, rotation, rotX, rotY);
 	}
 	
 	@Override
-	public void drawString(Font font, String message, Vector2 position, float scale, Color color, float rotation, Vector2 origin) {
-		drawString(font,
-				message,
-				position.x, position.y,
-				scale,
-				color,
-				rotation,
-				origin.x,
-				origin.y);
+	public void drawString(Font font, String message, Vector2 position, float scale, @Nullable Color color, float rotation, @Nullable Vector2 origin) {
+		float x, y;
+		x = position.x;
+		y = position.y;
+		
+		Color drawColor = (color != null) ? color : defaultColor;
+		
+		float rotX, rotY;
+		if(origin != null) {
+			rotX = origin.x;
+			rotY = origin.y;
+		} else {
+			rotX = 0.0f;
+			rotY = 0.0f;
+		}
+		
+		drawString(font, message, x, y, scale, color, rotation, rotX, rotY);
 	}
 	
 	@Override

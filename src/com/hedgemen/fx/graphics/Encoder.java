@@ -4,7 +4,7 @@ import com.hedgemen.fx.Rectangle;
 import com.hedgemen.fx.graphics.buffers.IndexBuffer;
 import com.hedgemen.fx.graphics.buffers.TransientVertexBuffer;
 import com.hedgemen.fx.graphics.buffers.VertexBuffer;
-import com.hedgemen.fx.util.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import static org.lwjgl.bgfx.BGFX.*;
 
@@ -55,7 +55,7 @@ public class Encoder {
 	}
 	
 	public void setScissor(Rectangle scissor) {
-		bgfx_encoder_set_scissor(handle, scissor.x, scissor.y, scissor.width, scissor.height);
+		bgfx_encoder_set_scissor(handle, (int)scissor.x, (int)scissor.y, (int)scissor.width, (int)scissor.height);
 	}
 	
 	public void setScissor(int x, int y, int width, int height) {

@@ -4,13 +4,13 @@ import com.hedgemen.fx.util.copying.Copy;
 
 public class Rectangle implements Copy<Rectangle> {
 	
-	public int x, y, width, height;
+	public float x, y, width, height;
 	
 	public Rectangle() {
 		this(0, 0, 0, 0);
 	}
 	
-	public Rectangle(int x, int y, int width, int height) {
+	public Rectangle(float x, float y, float width, float height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
